@@ -119,7 +119,7 @@ class SeaCucumbers:
                 return
 
 
-sc = SeaCucumbers('day25_easy.txt')
+sc = SeaCucumbers('inputs/day25_easy.txt')
 # sc.move_east()
 # sc.display_sea_floor()
 # sc.move_south()
