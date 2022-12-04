@@ -1,15 +1,19 @@
 import time
 from enum import Enum
+from typing import List
+
 import pandas as pd
 
 import warnings
 
+from src.advent_of_code_puzzle import AdventOfCodePuzzle
+
 warnings.simplefilter(action='ignore',
                       category=FutureWarning)  # setting ignore as a parameter and further adding category
 
-
 LINE_UP = '\033[1A'
 LINE_CLEAR = '\x1b[2K'
+
 
 class SeaCucumbers:
     class Cucumber(Enum):
@@ -17,18 +21,16 @@ class SeaCucumbers:
         EAST = '>'
         SOUTH = 'v'
 
-    def __init__(self, f_path: str) -> None:
+    def __init__(self, inputs: List[str]) -> None:
         sea_floor_lists = []
-        with open(f_path) as f:
-            for line in f:
-                # parsed_line = [self.Cucumber(c) for c in line.strip()]
-                parsed_line = [c for c in line.strip()]
-                sea_floor_lists.append(parsed_line)
+        for line in inputs:
+            parsed_line = [c for c in line]
+            sea_floor_lists.append(parsed_line)
 
         self.sea_floor = pd.DataFrame(sea_floor_lists)
 
         self.check_statuses()
-        self.display_sea_floor()
+        # self.display_sea_floor()
 
     def check_statuses(self):
         self.check_occupied()
@@ -113,15 +115,16 @@ class SeaCucumbers:
             self.move_east()
             self.move_south()
 
-            self.display_sea_floor()
-            
+            # self.display_sea_floor()
+
             if self.sea_floor.equals(current_sea_floor):
-                return
+                return i
 
 
-sc = SeaCucumbers('inputs/day25_easy.txt')
-# sc.move_east()
-# sc.display_sea_floor()
-# sc.move_south()
-# sc.display_sea_floor()
-sc.run_sim()
+class Day25(AdventOfCodePuzzle):
+    def part_1(self, inputs: List[str]) -> int:
+        sc = SeaCucumbers(inputs)
+        return sc.run_sim()
+
+    def part_2(self, inputs: List[str]) -> int:
+        return 1
