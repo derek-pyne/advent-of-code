@@ -32,6 +32,8 @@ def solver(day):
 @pytest.mark.parametrize(
     "day,expected_example_1,expected_test_1,expected_example_2,expected_test_2",
     [
+        (1, 24000, 69528, 45000, 206152),
+        (2, 15, 17189, 12, 13490),
         (3, 157, 7568, 70, 2780),
         (4, 2, 526, 4, 886),
     ]
