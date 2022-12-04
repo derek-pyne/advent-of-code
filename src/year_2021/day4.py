@@ -1,14 +1,10 @@
-from itertools import zip_longest
 from operator import attrgetter
+from typing import List
 
 import pandas as pd
 
-f_path = '2021/inputs/day4.txt'
-
-
-def grouper(iterable, n, fillvalue=None):
-    args = [iter(iterable)] * n
-    return zip_longest(*args, fillvalue=fillvalue)
+from src.advent_of_code_puzzle import AdventOfCodePuzzle
+from src.utils import grouper
 
 
 class BingoBoard:
@@ -42,20 +38,22 @@ class BingoBoard:
             return False
 
 
-with open(f_path) as f:
-    drawn_numbers = [int(s) for s in f.readline().strip().split(',')]
-    f.readline()
-    board_input = [line.strip() for line in f]
+def run_boards(inputs: List[str]) -> List[BingoBoard]:
+    drawn_numbers = [int(s) for s in inputs[0].split(',')]
     boards = []
-    for board_list in grouper(board_input, 6):
+    for board_list in grouper(inputs[2:], 6):
         boards.append(BingoBoard(board_list))
+    for num in drawn_numbers:
+        for board in boards:
+            board.draw_number(num=num)
+    return boards
 
-for num in drawn_numbers:
-    for board in boards:
-        board.draw_number(num=num)
 
-first_winner = min(boards, key=attrgetter('nums_drawn'))
-print(f'First winner score: {first_winner.score}')
+class Day4(AdventOfCodePuzzle):
+    def part_1(self, inputs: List[str]) -> int:
+        boards = run_boards(inputs)
+        return min(boards, key=attrgetter('nums_drawn')).score
 
-last_winner = max(boards, key=attrgetter('nums_drawn'))
-print(f'Last winner score: {last_winner.score}')
+    def part_2(self, inputs: List[str]) -> int:
+        boards = run_boards(inputs)
+        return max(boards, key=attrgetter('nums_drawn')).score
