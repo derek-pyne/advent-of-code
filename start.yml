@@ -1,0 +1,7 @@
+brew:
+  - shadowenv
+
+custom:
+  - name: "Install project as package"
+    is_condition_met: pip freeze | grep advent_of_code
+    action: pip install --editable .
