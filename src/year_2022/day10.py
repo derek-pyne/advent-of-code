@@ -28,9 +28,9 @@ class CathodeScreen:
         for i, val in enumerate(self.x):
             draw_position = (i % 40)
             if abs(draw_position - val) < 2:
-                output += '#'
+                output += '██'
             else:
-                output += '.'
+                output += '  '
 
             if draw_position == screen_width - 1:
                 output += '\n'
