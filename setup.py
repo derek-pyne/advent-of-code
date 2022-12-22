@@ -10,5 +10,6 @@ setup(
         'pip-tools',
         'pytest',
         'pandas',
+        'sympy',
     ],
 )
