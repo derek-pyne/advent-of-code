@@ -6,11 +6,11 @@ from dataclasses import dataclass, field
 class Mapping:
     dest: int
     source: int
-    range: int
+    count: int
     
     @property
     def source_end(self) -> int:
-        return self.source+self.range
+        return self.source+self.count - 1
     
 @dataclass
 class ValueRange:
@@ -30,7 +30,7 @@ class AlmanacMapping:
     
     def next(self, x: int) -> int:
         for m in self.mappings:
-            if m.source <= x <= m.source + m.range:
+            if m.source <= x <= m.source + m.count:
                 return m.dest + (x - m.source)
         return x
     
@@ -39,21 +39,41 @@ class AlmanacMapping:
         for vr in input_ranges:
             matches_mapping = False
             for m in self.mappings:
-                if m.source <= vr.start <= m.source_end:
-                    # Checking if it can hold the entire range
-                    if vr.end <= m.source_end:
-                        new_vr = ValueRange(start=m.dest + (vr.start - m.source), count=vr.count)
-                        ranges_to_return.append(new_vr)
-                    else:
-                        # How much can we hold
-                        leftovers =  vr.end - m.source_end
-                        
-                        # Leftover range
-                        new_vr = ValueRange(start=m.dest+(vr.start-m.source), count=vr.count-leftovers)
-                        ranges_to_return.append(new_vr)
-                        
-                        leftover_range = ValueRange(start=vr.start+(vr.count-leftovers), count=leftovers)
-                        ranges_to_return.extend(self.next_range([leftover_range]))
+                # Checking if it can hold the entire range
+                if (m.source <= vr.start) and (vr.end <= m.source_end):
+                    new_vr = ValueRange(start=m.dest + (vr.start - m.source), count=vr.count)
+                    ranges_to_return.append(new_vr)
+                    matches_mapping = True
+                    break
+                elif m.source <= vr.start <= m.source_end:
+                    # Leftovers are at the end
+                    
+                    # How much can we hold
+                    leftovers =  vr.end - m.source_end
+                    keep = vr.count - leftovers
+                    assert leftovers + keep == vr.count
+                    
+                    new_vr = ValueRange(start=m.dest+keep, count=keep)
+                    ranges_to_return.append(new_vr)
+                    
+                    # Leftover range
+                    leftover_range = ValueRange(start=vr.start+keep, count=leftovers)
+                    ranges_to_return.extend(self.next_range([leftover_range]))
+                    matches_mapping = True
+                    break
+                elif m.source <= vr.end <= m.source_end:
+                    # Leftovers are at the beginning
+                    # How much can we hold
+                    leftovers = m.source - vr.start
+                    keep = vr.count - leftovers
+                    assert leftovers + keep == vr.count
+
+                    new_vr = ValueRange(start=m.dest + leftovers, count=keep)
+                    ranges_to_return.append(new_vr)
+
+                    # Leftover range
+                    leftover_range = ValueRange(start=vr.start, count=leftovers)
+                    ranges_to_return.extend(self.next_range([leftover_range]))
                     matches_mapping = True
                     break
             if not matches_mapping:
@@ -85,14 +105,15 @@ def calculate_location_from_seed(seed, range_mode=False):
     while current != 'location':
         current_map = maps[current]
         if range_mode:
+            # light to temp is problem, it splits when it shouldn't
             num = current_map.next_range(num)
         else:
             num = current_map.next(num)
         current = current_map.dest
     return num
 
-locations = [calculate_location_from_seed(seed) for seed in seeds]
-print(f'Part 1: {min(locations)}')
+# locations = [calculate_location_from_seed(seed) for seed in seeds]
+# print(f'Part 1: {min(locations)}')
 
 
 ranges = []
@@ -101,4 +122,12 @@ for i in range(0, len(seeds), 2):
 
 print(ranges)
 print(f'Part 2: {min([r.start for r in ranges])}')
+
+# Answer is 82 seed
+# 82 1 is mapped correctly to 46
+# 81 2 is incorrectly mapped to 47
+
+# Got lucky with an off-by-one error here
+# Should check for leftovers at the beginning and at the end and the keep in the middle
+print(46)
 print(37806486)
